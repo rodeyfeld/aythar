@@ -1,12 +1,10 @@
-from time import sleep
-
 import arcade
 
 from main_menu import MainMenu
 
-WINDOW_LENGTH = 600
-WINDOW_WIDTH = 800
-SCALING = 1
+WINDOW_LENGTH = 1000
+WINDOW_WIDTH = 400
+SCALING = .5
 
 
 class Game(arcade.Window):
