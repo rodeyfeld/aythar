@@ -1,9 +1,14 @@
+import math
+from random import randint
+
 import arcade
 
 from entity_sprite import EntitySprite
 
 PLAYER_MOVEMENT_SPEED = 10
 BULLET_SPEED = 10
+ENEMY_SPAWN_OFFSET = 25
+ENEMY_MOVEMENT_SPEED = 3
 
 
 class Aythar(arcade.View):
@@ -33,26 +38,33 @@ class Aythar(arcade.View):
         self.bullet_list.update()
         for bullet in self.bullet_list:
             if (bullet.center_x > self.window_width or bullet.center_x < 0 or
-            bullet.center_y > self.window_length or bullet.center_y < 0):
+                    bullet.center_y > self.window_length or bullet.center_y < 0):
                 bullet.remove_from_sprite_lists()
 
+        for enemy in self.enemy_character_list:
+            if (enemy.center_x > self.window_width or enemy.center_x < 0 or
+                    enemy.center_y > self.window_length or enemy.center_y < 0 or
+                    enemy.collides_with_list(self.bullet_list)):
+                enemy.remove_from_sprite_lists()
+
+        if len(self.enemy_character_list) < 5:
+            self.create_enemy()
+
     def create_player(self):
-        self.player_character = EntitySprite("./assets/pixel_ship.png", self.scaling, 50, 50)
+        # Initialize player character at the bottom middle of the window
+        self.player_character = EntitySprite("./assets/pixel_ship.png", self.scaling, self.window_width // 2, 0)
         self.player_character_list.append(self.player_character)
 
-    def create_bullet(self, direction):
-        if direction == "up" or direction == "down":
-            asset = "./assets/pixel_laser_green_vertical.png"
-        else:
-            asset = "./assets/pixel_laser_green_horizontal.png"
-        self.bullet_list.append(EntitySprite(asset,
-                                             self.scaling,
-                                             self.player_character.center_x,
-                                             self.player_character.center_y
-                                             ))
+    def create_enemy(self):
+        # Add an enemy starting at the top of the window and at a random position on the x axis
+        enemy_center_x = randint(0 + ENEMY_SPAWN_OFFSET, self.window_width - ENEMY_SPAWN_OFFSET)
+        enemy_center_y = self.window_length
+        enemy_character = EntitySprite("./assets/enemy_ship.png", self.scaling, enemy_center_x, enemy_center_y)
+        enemy_character.change_y = -ENEMY_MOVEMENT_SPEED
+        self.enemy_character_list.append(enemy_character)
 
     def on_key_release(self, key, modifiers):
-
+        # TODO: Improve player movement mechanics
         if key == arcade.key.UP or key == arcade.key.DOWN:
             self.player_character.change_y = 0
         elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
