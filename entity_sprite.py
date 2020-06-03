@@ -4,9 +4,13 @@ import arcade
 class EntitySprite(arcade.Sprite):
     def __init__(self, asset, scaling, x, y):
         super().__init__(asset, scaling)
+        self.asset = asset
         self.center_x = x
         self.center_y = y
         self.prop_sprite_list = arcade.SpriteList()
+
+    def __str__(self):
+        return "({0}, {1}) - {2}".format(self.center_x, self.center_y, self.asset)
 
     def clear_props(self):
         for _ in range(0, len(self.prop_sprite_list)):

@@ -10,6 +10,10 @@ PLAYER_PROP_DISTANCE = 15
 BULLET_SPEED = 10
 ENEMY_SPAWN_OFFSET = 25
 ENEMY_MOVEMENT_SPEED = 3
+ENEMY_SPAWN_TIMER = .5
+SCORE_POS_X = 10
+SCORE_POS_Y = 10
+SCORE_FONT_SIZE = 14
 
 
 class Aythar(arcade.View):
@@ -25,10 +29,22 @@ class Aythar(arcade.View):
         self.bullet_list: arcade.SpriteList = arcade.SpriteList()
         self.explosion_list: arcade.SpriteList = arcade.SpriteList()
         self.explosion_texture_list = []
+        self.score = 0
+        # Booleans for tracking player movements
+        self.left_pressed = False
+        self.right_pressed = False
+        self.up_pressed = False
+        self.down_pressed = False
+
+    def setup(self):
+        self.create_player()
         # Currently 3 explosion types available
         for i in range(0, 3):
+            # Number of columns in spritesheet
             columns = 10
+            # Total number of individual frames in spritesheet
             count = 70
+            # Length and width of each sprite frame
             sprite_width = 100
             sprite_height = 100
             # Load the explosions from sprite sheet
@@ -40,9 +56,8 @@ class Aythar(arcade.View):
                 columns,
                 count
             ))
-
-    def setup(self):
-        self.create_player()
+        # Every ENEMY_SPAWN_TIMER seconds, call the create_enemy function
+        arcade.schedule(self.create_enemy, ENEMY_SPAWN_TIMER)
 
     def on_draw(self):
         arcade.start_render()
@@ -51,36 +66,44 @@ class Aythar(arcade.View):
         self.enemy_character_list.draw()
         self.bullet_list.draw()
         self.explosion_list.draw()
+        score_str = "Score: {0}".format(self.score)
+        # Display score at
+        arcade.draw_text(score_str, SCORE_POS_X, SCORE_POS_Y, arcade.color.WHITE, SCORE_FONT_SIZE)
 
     def on_update(self, delta_time: float):
-        self.player_character_list.update()
-        self.player_character.prop_sprite_list.update()
         self.enemy_character_list.update()
         self.bullet_list.update()
         self.explosion_list.update()
+        self.player_character_list.update()
+        self.player_character.prop_sprite_list.update()
+
+        for enemy in self.enemy_character_list:
+            collisions = enemy.collides_with_list(self.bullet_list)
+            if collisions:
+                self.create_explosion(enemy.center_x, enemy.center_y)
+                self.score += 1
+                for collision in collisions:
+                    collision.remove_from_sprite_lists()
+                    enemy.remove_from_sprite_lists()
+            elif (enemy.center_x > self.window_width or enemy.center_x < 0 or
+                    enemy.center_y > self.window_length or enemy.center_y < 0):
+                enemy.remove_from_sprite_lists()
+
         for bullet in self.bullet_list:
             if (bullet.center_x > self.window_width or bullet.center_x < 0 or
                     bullet.center_y > self.window_length or bullet.center_y < 0):
                 bullet.remove_from_sprite_lists()
 
-        for enemy in self.enemy_character_list:
-            if (enemy.center_x > self.window_width or enemy.center_x < 0 or
-                    enemy.center_y > self.window_length or enemy.center_y < 0 or
-                    enemy.collides_with_list(self.bullet_list)):
-                enemy.remove_from_sprite_lists()
-                self.create_explosion(enemy.center_x, enemy.center_y)
             # TODO send player to game over screen when hit by enemy
             # if enemy.collides_with_list(self.player_character_list):
-
-        if len(self.enemy_character_list) < 5:
-            self.create_enemy()
 
     def create_player(self):
         # Initialize player character at the bottom middle of the window
         self.player_character = EntitySprite("./assets/pixel_ship.png", self.scaling, self.window_width // 2, 25)
         self.player_character_list.append(self.player_character)
 
-    def create_enemy(self):
+    def create_enemy(self, delta_time: float):
+        # delta_time param required by arcade library
         # Add an enemy starting at the top of the window and at a random position on the x axis
         enemy_center_x = randint(0 + ENEMY_SPAWN_OFFSET, self.window_width - ENEMY_SPAWN_OFFSET)
         enemy_center_y = self.window_length
@@ -109,6 +132,7 @@ class Aythar(arcade.View):
 
     def on_key_press(self, key, modifiers):
         # TODO: Split key presses into more concise definitions
+        # TODO: Fix propulsion sprite leaving player character on left/right movement before pressing up
         # Keys for controlling player movement
         if key == arcade.key.UP:
             self.player_character.change_y = PLAYER_MOVEMENT_SPEED

@@ -13,6 +13,9 @@ class AnimatedPropSprite(arcade.Sprite):
         self.center_x = center_x
         self.center_y = center_y
 
+    def __str__(self):
+        return "({0}, {1}) - {2}".format(self.center_x, self.center_y, self.textures)
+
     def update(self):
 
         # Update to the next frame of the animation. If we are at the end
