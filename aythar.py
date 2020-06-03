@@ -1,11 +1,12 @@
 from random import randint
 
 import arcade
-
+from animated_prop_sprite import AnimatedPropSprite
 from entity_sprite import EntitySprite
 from prop_sprite import PropSprite
 
 PLAYER_MOVEMENT_SPEED = 10
+PLAYER_PROP_DISTANCE = 15
 BULLET_SPEED = 10
 ENEMY_SPAWN_OFFSET = 25
 ENEMY_MOVEMENT_SPEED = 3
@@ -22,6 +23,23 @@ class Aythar(arcade.View):
         self.player_character_list: arcade.SpriteList = arcade.SpriteList()
         self.enemy_character_list: arcade.SpriteList = arcade.SpriteList()
         self.bullet_list: arcade.SpriteList = arcade.SpriteList()
+        self.explosion_list: arcade.SpriteList = arcade.SpriteList()
+        self.explosion_texture_list = []
+        # Currently 3 explosion types available
+        for i in range(0, 3):
+            columns = 10
+            count = 70
+            sprite_width = 100
+            sprite_height = 100
+            # Load the explosions from sprite sheet
+            asset = "./assets/explosion_" + str(i) + ".png"
+            self.explosion_texture_list.append(arcade.load_spritesheet(
+                asset,
+                sprite_width,
+                sprite_height,
+                columns,
+                count
+            ))
 
     def setup(self):
         self.create_player()
@@ -32,12 +50,14 @@ class Aythar(arcade.View):
         self.player_character.prop_sprite_list.draw()
         self.enemy_character_list.draw()
         self.bullet_list.draw()
+        self.explosion_list.draw()
 
     def on_update(self, delta_time: float):
         self.player_character_list.update()
         self.player_character.prop_sprite_list.update()
         self.enemy_character_list.update()
         self.bullet_list.update()
+        self.explosion_list.update()
         for bullet in self.bullet_list:
             if (bullet.center_x > self.window_width or bullet.center_x < 0 or
                     bullet.center_y > self.window_length or bullet.center_y < 0):
@@ -48,6 +68,7 @@ class Aythar(arcade.View):
                     enemy.center_y > self.window_length or enemy.center_y < 0 or
                     enemy.collides_with_list(self.bullet_list)):
                 enemy.remove_from_sprite_lists()
+                self.create_explosion(enemy.center_x, enemy.center_y)
             # TODO send player to game over screen when hit by enemy
             # if enemy.collides_with_list(self.player_character_list):
 
@@ -66,6 +87,13 @@ class Aythar(arcade.View):
         enemy_character = EntitySprite("./assets/enemy_ship.png", self.scaling, enemy_center_x, enemy_center_y)
         enemy_character.change_y = -ENEMY_MOVEMENT_SPEED
         self.enemy_character_list.append(enemy_character)
+
+    def create_explosion(self, center_x, center_y):
+        # Choose random explosion from explosions list
+        explosion_type = self.explosion_texture_list[randint(0, len(self.explosion_texture_list)-1)]
+        explosion = AnimatedPropSprite(explosion_type, center_x, center_y)
+        explosion.update()
+        self.explosion_list.append(explosion)
 
     def on_key_release(self, key, modifiers):
         # TODO: Improve player movement mechanics
@@ -88,7 +116,7 @@ class Aythar(arcade.View):
                 asset="./assets/thruster_bottom.png",
                 scaling=self.scaling,
                 x=self.player_character.center_x,
-                y=self.player_character.bottom - 15
+                y=self.player_character.bottom - PLAYER_PROP_DISTANCE
             )
             propulsion.change_y = PLAYER_MOVEMENT_SPEED
             self.player_character.prop_sprite_list.append(propulsion)
