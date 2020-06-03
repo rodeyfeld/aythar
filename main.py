@@ -6,6 +6,7 @@ from game import Game
 # Explosions by Will Tice:
 # https://untiedgames.itch.io/five-free-pixel-explosions
 
+
 def main():
     game = Game()
     game.setup()

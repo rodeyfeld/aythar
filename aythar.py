@@ -10,7 +10,7 @@ PLAYER_PROP_DISTANCE = 15
 BULLET_SPEED = 10
 ENEMY_SPAWN_OFFSET = 25
 ENEMY_MOVEMENT_SPEED = 3
-ENEMY_SPAWN_TIMER = .5
+ENEMY_SPAWN_TIMER = 1
 SCORE_POS_X = 10
 SCORE_POS_Y = 10
 SCORE_FONT_SIZE = 14
@@ -22,6 +22,7 @@ class Aythar(arcade.View):
         super().__init__()
         self.window_width: int = window_width
         self.window_length: int = window_length
+        self.background = None
         self.scaling: int = scaling
         self.player_character = None
         self.player_character_list: arcade.SpriteList = arcade.SpriteList()
@@ -30,14 +31,10 @@ class Aythar(arcade.View):
         self.explosion_list: arcade.SpriteList = arcade.SpriteList()
         self.explosion_texture_list = []
         self.score = 0
-        # Booleans for tracking player movements
-        self.left_pressed = False
-        self.right_pressed = False
-        self.up_pressed = False
-        self.down_pressed = False
 
     def setup(self):
         self.create_player()
+        self.background = arcade.load_texture("./assets/space_background.png")
         # Currently 3 explosion types available
         for i in range(0, 3):
             # Number of columns in spritesheet
@@ -61,6 +58,9 @@ class Aythar(arcade.View):
 
     def on_draw(self):
         arcade.start_render()
+        arcade.draw_lrwh_rectangle_textured(0, 0,
+                                            self.window_width, self.window_length,
+                                            self.background)
         self.player_character_list.draw()
         self.player_character.prop_sprite_list.draw()
         self.enemy_character_list.draw()
