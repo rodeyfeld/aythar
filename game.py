@@ -2,7 +2,7 @@ import arcade
 
 from main_menu import MainMenu
 
-WINDOW_LENGTH = 1000
+WINDOW_LENGTH = 800
 WINDOW_WIDTH = 400
 SCALING = .5
 

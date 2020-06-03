@@ -1,9 +1,9 @@
-import math
 from random import randint
 
 import arcade
 
 from entity_sprite import EntitySprite
+from prop_sprite import PropSprite
 
 PLAYER_MOVEMENT_SPEED = 10
 BULLET_SPEED = 10
@@ -29,11 +29,13 @@ class Aythar(arcade.View):
     def on_draw(self):
         arcade.start_render()
         self.player_character_list.draw()
+        self.player_character.prop_sprite_list.draw()
         self.enemy_character_list.draw()
         self.bullet_list.draw()
 
     def on_update(self, delta_time: float):
         self.player_character_list.update()
+        self.player_character.prop_sprite_list.update()
         self.enemy_character_list.update()
         self.bullet_list.update()
         for bullet in self.bullet_list:
@@ -46,13 +48,15 @@ class Aythar(arcade.View):
                     enemy.center_y > self.window_length or enemy.center_y < 0 or
                     enemy.collides_with_list(self.bullet_list)):
                 enemy.remove_from_sprite_lists()
+            # TODO send player to game over screen when hit by enemy
+            # if enemy.collides_with_list(self.player_character_list):
 
         if len(self.enemy_character_list) < 5:
             self.create_enemy()
 
     def create_player(self):
         # Initialize player character at the bottom middle of the window
-        self.player_character = EntitySprite("./assets/pixel_ship.png", self.scaling, self.window_width // 2, 0)
+        self.player_character = EntitySprite("./assets/pixel_ship.png", self.scaling, self.window_width // 2, 25)
         self.player_character_list.append(self.player_character)
 
     def create_enemy(self):
@@ -67,19 +71,41 @@ class Aythar(arcade.View):
         # TODO: Improve player movement mechanics
         if key == arcade.key.UP or key == arcade.key.DOWN:
             self.player_character.change_y = 0
+            self.player_character.clear_props()
         elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
             self.player_character.change_x = 0
+            self.player_character.adjust_props(
+                change_x=self.player_character.change_x,
+                change_y=self.player_character.change_y
+            )
 
     def on_key_press(self, key, modifiers):
+        # TODO: Split key presses into more concise definitions
         # Keys for controlling player movement
         if key == arcade.key.UP:
             self.player_character.change_y = PLAYER_MOVEMENT_SPEED
+            propulsion = PropSprite(
+                asset="./assets/thruster_bottom.png",
+                scaling=self.scaling,
+                x=self.player_character.center_x,
+                y=self.player_character.bottom - 15
+            )
+            propulsion.change_y = PLAYER_MOVEMENT_SPEED
+            self.player_character.prop_sprite_list.append(propulsion)
         elif key == arcade.key.DOWN:
             self.player_character.change_y = -PLAYER_MOVEMENT_SPEED
         elif key == arcade.key.LEFT:
             self.player_character.change_x = -PLAYER_MOVEMENT_SPEED
+            self.player_character.adjust_props(
+                change_x=self.player_character.change_x,
+                change_y=self.player_character.change_y
+            )
         elif key == arcade.key.RIGHT:
             self.player_character.change_x = PLAYER_MOVEMENT_SPEED
+            self.player_character.adjust_props(
+                change_x=self.player_character.change_x,
+                change_y=self.player_character.change_y
+            )
         # Keys for controlling player firing
         elif key == arcade.key.W:
             bullet = EntitySprite(
