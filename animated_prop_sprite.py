@@ -2,7 +2,6 @@ import arcade
 
 
 class AnimatedPropSprite(arcade.Sprite):
-    """ This class creates an explosion animation """
 
     def __init__(self, texture_list, center_x, center_y):
         super().__init__()

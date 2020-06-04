@@ -35,6 +35,7 @@ class MainMenu(arcade.View):
         # If button pressed, move to game view
         if self.is_button_pressed(_x, _y):
             self.window.show_view(self.aythar_view)
+            self.aythar_view.schedule_enemies()
 
     def is_button_pressed(self, x, y):
         # Check if x, y coordinates of mouse click collides with button
