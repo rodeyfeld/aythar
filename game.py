@@ -1,10 +1,6 @@
 import arcade
-
+from config import WINDOW_WIDTH, WINDOW_LENGTH
 from main_menu import MainMenu
-
-WINDOW_LENGTH = 800
-WINDOW_WIDTH = 400
-SCALING = .5
 
 
 class Game(arcade.Window):
@@ -16,7 +12,7 @@ class Game(arcade.Window):
 
     def setup(self):
         # When game starts, setup and display main menu
-        self.main_menu_view = MainMenu(WINDOW_WIDTH, WINDOW_LENGTH, SCALING)
+        self.main_menu_view = MainMenu()
         self.main_menu_view.setup()
         self.show_view(self.main_menu_view)
 

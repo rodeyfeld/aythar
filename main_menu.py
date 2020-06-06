@@ -2,21 +2,19 @@ import arcade
 
 from aythar import Aythar
 from menu_button import MenuButton
+from config import WINDOW_WIDTH, WINDOW_LENGTH, SCALING
 
 
 class MainMenu(arcade.View):
 
-    def __init__(self, window_width, window_length, scaling):
+    def __init__(self):
         super().__init__()
-        self.window_width = window_width
-        self.window_length = window_length
-        self.scaling = scaling
         self.start_button_list = arcade.SpriteList()
         self.aythar_view = None
 
     def setup(self):
         self.create_buttons()
-        self.aythar_view = Aythar(window_width=self.window_width, window_length=self.window_length, scaling=self.scaling)
+        self.aythar_view = Aythar()
         self.aythar_view.setup()
 
     def on_draw(self):
@@ -26,9 +24,9 @@ class MainMenu(arcade.View):
     def create_buttons(self):
         # Create "Start" button
         self.start_button_list.append(MenuButton(asset="./assets/start_button.png",
-                                                 scaling=self.scaling,
-                                                 x=self.window_width // 2,
-                                                 y=self.window_length // 2,
+                                                 scaling=SCALING,
+                                                 x=WINDOW_WIDTH // 2,
+                                                 y=WINDOW_LENGTH // 2,
                                                  ))
 
     def on_mouse_press(self, _x, _y, _button, _modifiers):
@@ -43,7 +41,6 @@ class MainMenu(arcade.View):
         # Account for offsets caused by checking from center of button
         start_width_center_offset = start_button.width // 2
         start_height_center_offset = start_button.height // 2
-        print(x, y)
         if (
                 start_button.center_x + start_width_center_offset
                 > x >

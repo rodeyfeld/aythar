@@ -1,7 +1,7 @@
 import arcade
 
 
-class AnimatedPropSprite(arcade.Sprite):
+class AnimatedEntitySprite(arcade.Sprite):
 
     def __init__(self, texture_list, center_x, center_y):
         super().__init__()
@@ -16,11 +16,12 @@ class AnimatedPropSprite(arcade.Sprite):
         return "({0}, {1}) - {2}".format(self.center_x, self.center_y, self.textures)
 
     def update(self):
-
-        # Update to the next frame of the animation. If we are at the end
-        # of our frames, then delete this sprite.
-        self.current_texture += 1
+        # super().update()
+        # self.center_x += self.change_x
+        # self.center_y += self.change_y
+        # Update to the next frame of the animation. Reset if at end of animation
         if self.current_texture < len(self.textures):
             self.set_texture(self.current_texture)
+            self.current_texture += 1
         else:
-            self.remove_from_sprite_lists()
+            self.current_texture = 0
