@@ -145,6 +145,17 @@ class Aythar(arcade.View):
         self.player_character = EntitySprite("./assets/pixel_ship.png", SCALING, WINDOW_WIDTH // 2, 25)
         self.player_character_list.append(self.player_character)
 
+    def create_bullet(self, origin_character, change_x, change_y, bullet_speed, asset):
+        bullet = EntitySprite(
+            asset,
+            SCALING,
+            origin_character.center_x,
+            origin_character.center_y
+        )
+        bullet.change_x = change_x * bullet_speed
+        bullet.change_y = change_y * bullet_speed
+        self.bullet_list.append(bullet)
+
     def create_enemy(self, delta_time: float):
         # delta_time param required by arcade library
         # Add an enemy starting at the top of the window and at a random position on the x axis
@@ -214,38 +225,34 @@ class Aythar(arcade.View):
             )
         # Keys for controlling player firing
         elif key == arcade.key.W:
-            bullet = EntitySprite(
-                "./assets/pixel_laser_green_vertical.png",
-                SCALING,
-                self.player_character.center_x,
-                self.player_character.center_y
+            self.create_bullet(
+                origin_character=self.player_character,
+                change_x=0,
+                change_y=1,
+                bullet_speed=PLAYER_BULLET_SPEED,
+                asset="./assets/pixel_laser_green_vertical.png"
             )
-            bullet.change_y = BULLET_SPEED
-            self.bullet_list.append(bullet)
         elif key == arcade.key.A:
-            bullet = EntitySprite(
-                "./assets/pixel_laser_green_horizontal.png",
-                SCALING,
-                self.player_character.center_x,
-                self.player_character.center_y
+            self.create_bullet(
+                origin_character=self.player_character,
+                change_x=-1,
+                change_y=0,
+                bullet_speed=PLAYER_BULLET_SPEED,
+                asset="./assets/pixel_laser_green_horizontal.png"
             )
-            bullet.change_x = -BULLET_SPEED
-            self.bullet_list.append(bullet)
         elif key == arcade.key.S:
-            bullet = EntitySprite(
-                "./assets/pixel_laser_green_vertical.png",
-                SCALING,
-                self.player_character.center_x,
-                self.player_character.center_y
+            self.create_bullet(
+                origin_character=self.player_character,
+                change_x=0,
+                change_y=-1,
+                bullet_speed=PLAYER_BULLET_SPEED,
+                asset="./assets/pixel_laser_green_vertical.png"
             )
-            bullet.change_y = -BULLET_SPEED
-            self.bullet_list.append(bullet)
         elif key == arcade.key.D:
-            bullet = EntitySprite(
-                "./assets/pixel_laser_green_horizontal.png",
-                SCALING,
-                self.player_character.center_x,
-                self.player_character.center_y
+            self.create_bullet(
+                origin_character=self.player_character,
+                change_x=1,
+                change_y=0,
+                bullet_speed=PLAYER_BULLET_SPEED,
+                asset="./assets/pixel_laser_green_horizontal.png"
             )
-            bullet.change_x = BULLET_SPEED
-            self.bullet_list.append(bullet)
