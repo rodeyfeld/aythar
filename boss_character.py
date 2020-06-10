@@ -1,14 +1,18 @@
+import arcade
 import animated_entity_sprite
+import bullet_sprite
 from config import *
 
 
 class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
 
-    def __init__(self, texture_list, center_x, center_y, health=1, damage=1):
+    def __init__(self, texture_list, center_x, center_y, bullet_types, health=1, damage=1):
         super().__init__(texture_list=texture_list, center_x=center_x, center_y=center_y)
         self.scale = SCALING * 4
+        self.bullet_types = bullet_types
         self.health = health
         self.damage = damage
+        print("Boss", self.textures)
 
     def update(self):
         super().update()

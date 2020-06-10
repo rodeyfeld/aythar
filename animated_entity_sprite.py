@@ -16,9 +16,6 @@ class AnimatedEntitySprite(arcade.Sprite):
         return "({0}, {1}) - {2}".format(self.center_x, self.center_y, self.textures)
 
     def update(self):
-        # super().update()
-        # self.center_x += self.change_x
-        # self.center_y += self.change_y
         # Update to the next frame of the animation. Reset if at end of animation
         if self.current_texture < len(self.textures):
             self.set_texture(self.current_texture)

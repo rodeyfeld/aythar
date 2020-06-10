@@ -15,6 +15,3 @@ class Game(arcade.Window):
         self.main_menu_view = MainMenu()
         self.main_menu_view.setup()
         self.show_view(self.main_menu_view)
-
-
-

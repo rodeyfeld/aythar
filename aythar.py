@@ -5,7 +5,10 @@ from random import randint
 from animated_entity_sprite import AnimatedEntitySprite
 from animated_prop_sprite import AnimatedPropSprite
 from boss_character import BossCharacter
+from bullet_sprite import BulletSprite
+from bullet_type import BulletType
 from entity_sprite import EntitySprite
+from player_character import PlayerCharacter
 from prop_sprite import PropSprite
 from config import *
 
@@ -18,18 +21,27 @@ class Aythar(arcade.View):
         self.score = 0
         # All spritelists in game
         self.background_list: arcade.SpriteList = arcade.SpriteList()
+        # SpriteList for player character
         self.player_character_list: arcade.SpriteList = arcade.SpriteList()
+        # SpriteList for enemies
         self.enemy_character_list: arcade.SpriteList = arcade.SpriteList()
         self.enemy_boss_character_list: arcade.SpriteList = arcade.SpriteList()
+        # SpriteList for bullets
+        # TODO: Move to individual enemy/player classes
         self.bullet_list: arcade.SpriteList = arcade.SpriteList()
+        # SpriteList for explosions
+        # TODO: Move to individual enemy/player classes
         self.explosion_list: arcade.SpriteList = arcade.SpriteList()
         # Textures for the explosions assigned in setup
         self.explosion_texture_list = []
-        self.enemy_boss_character_texture_list = []
+        # Textures for boss
+        self.enemy_boss_character_texture_list = None
+        self.enemy_boss_character_texture_list = None
+        self.enemy_boss_bullet_types = []
         self.time_elapsed: float = 0.0
 
     def setup(self):
-        self.create_player()
+        # self.create_player()
         # Create vertically scrolling background image
         self.background_list.append(PropSprite(
             asset="./assets/space_background.png",
@@ -47,37 +59,34 @@ class Aythar(arcade.View):
         ))
         # Currently 3 explosion types available
         for i in range(0, 3):
-            # Number of columns in spritesheet
-            columns = 10
-            # Total number of individual frames in spritesheet
-            count = 70
-            # Length and width of each sprite frame
-            sprite_width = 100
-            sprite_height = 100
-            # Load the explosions from sprite sheet
             asset = "./assets/explosion_" + str(i) + ".png"
-            self.explosion_texture_list.append(arcade.load_spritesheet(
-                asset,
-                sprite_width,
-                sprite_height,
-                columns,
-                count
-            ))
-        # Setup textures for boss
-        columns = 2
-        # Total number of individual frames in spritesheet
-        count = 2
-        # Length and width of each sprite frame
-        sprite_width = 32
-        sprite_height = 32
-        self.enemy_boss_character_texture_list = arcade.load_spritesheet(
-            "./assets/enemy_boss.png",
-            # "./assets/enemy_boss.png",
-            sprite_width,
-            sprite_height,
-            columns,
-            count
+            self.explosion_texture_list.append(
+                self.create_texture_list(
+                    asset=asset,
+                    sprite_width=100,
+                    sprite_height=100,
+                    columns=10,
+                    count=70
+                )
+            )
+        # Texture list for boss
+        self.enemy_boss_character_texture_list = self.create_texture_list(
+            asset="./assets/enemy_boss.png",
+            sprite_width=32,
+            sprite_height=32,
+            columns=2,
+            count=2
         )
+        # Texture list for boss bullets
+        self.enemy_boss_bullet_types.append(self.create_texture_list(
+            asset="./assets/star_bullet.png",
+            sprite_width=64,
+            sprite_height=64,
+            columns=64,
+            count=64
+        ))
+
+        # Setup bullet for player
 
     def schedule_enemies(self):
         # Every ENEMY_SPAWN_TIMER seconds, call the create_enemy function
@@ -87,7 +96,6 @@ class Aythar(arcade.View):
         arcade.start_render()
         self.background_list.draw()
         self.player_character_list.draw()
-        self.player_character.prop_sprite_list.draw()
         self.enemy_character_list.draw()
         self.enemy_boss_character_list.draw()
         self.bullet_list.draw()
@@ -109,7 +117,8 @@ class Aythar(arcade.View):
         self.background_list.update()
         if math.floor(self.time_elapsed) == 1 and len(self.enemy_boss_character_list) < 1:
             self.create_boss()
-            arcade.unschedule(self.create_enemy)
+            self.create_player()
+            # arcade.unschedule(self.create_enemy)
 
         # for boss in self.enemy_boss_character_list:
         #     boss.update()
@@ -118,7 +127,6 @@ class Aythar(arcade.View):
         self.bullet_list.update()
         self.explosion_list.update()
         self.player_character_list.update()
-        self.player_character.prop_sprite_list.update()
 
         for enemy in self.enemy_character_list:
             collisions = enemy.collides_with_list(self.bullet_list)
@@ -142,19 +150,31 @@ class Aythar(arcade.View):
 
     def create_player(self):
         # Initialize player character at the bottom middle of the window
-        self.player_character = EntitySprite("./assets/pixel_ship.png", SCALING, WINDOW_WIDTH // 2, 25)
-        self.player_character_list.append(self.player_character)
-
-    def create_bullet(self, origin_character, change_x, change_y, bullet_speed, asset):
-        bullet = EntitySprite(
-            asset,
-            SCALING,
-            origin_character.center_x,
-            origin_character.center_y
+        # Texture
+        player_texture_list = self.create_texture_list(
+            asset="./assets/player_ship.png",
+            sprite_width=72,
+            sprite_height=72,
+            columns=4,
+            count=4
         )
-        bullet.change_x = change_x * bullet_speed
-        bullet.change_y = change_y * bullet_speed
-        self.bullet_list.append(bullet)
+        player_bullet_types = []
+        player_bullet_types.append(BulletType(self.create_texture_list(
+            asset="./assets/star_bullet.png",
+            sprite_width=64,
+            sprite_height=64,
+            columns=64,
+            count=64
+        )))
+
+        self.player_character = PlayerCharacter(
+            texture_list=player_texture_list,
+            center_x=WINDOW_WIDTH // 2,
+            center_y=25,
+            bullet_types=player_bullet_types
+        )
+        self.player_character.setup()
+        self.player_character_list.append(self.player_character)
 
     def create_enemy(self, delta_time: float):
         # delta_time param required by arcade library
@@ -169,9 +189,10 @@ class Aythar(arcade.View):
         enemy_center_x = WINDOW_WIDTH // 2
         enemy_center_y = WINDOW_LENGTH
         enemy_character = BossCharacter(
-            self.enemy_boss_character_texture_list,
-            enemy_center_x,
-            enemy_center_y,
+            texture_list=self.enemy_boss_character_texture_list,
+            center_x=enemy_center_x,
+            center_y=enemy_center_y,
+            bullet_types=self.enemy_boss_bullet_types,
         )
         enemy_character.change_y = -BOSS_MOVEMENT_SPEED
         self.enemy_boss_character_list.append(enemy_character)
@@ -183,76 +204,60 @@ class Aythar(arcade.View):
         explosion.update()
         self.explosion_list.append(explosion)
 
+    @staticmethod
+    def create_texture_list(asset, columns, count, sprite_width, sprite_height):
+        texture_list = arcade.load_spritesheet(
+            file_name=asset,
+            sprite_width=sprite_width,  # Sprite width of each frame
+            sprite_height=sprite_height,  # Sprite height of each frame
+            columns=columns,  # Number of columns in spritesheet
+            count=count  # Total number of frames in spritesheet
+        )
+        return texture_list
+
     def on_key_release(self, key, modifiers):
         # TODO: Improve player movement mechanics
         if key == arcade.key.UP or key == arcade.key.DOWN:
             self.player_character.change_y = 0
-            self.player_character.clear_props()
         elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
             self.player_character.change_x = 0
-            self.player_character.adjust_props(
-                change_x=self.player_character.change_x,
-                change_y=self.player_character.change_y
-            )
 
     def on_key_press(self, key, modifiers):
-        # TODO: Split key presses into more concise definitions
         # TODO: Fix propulsion sprite leaving player character on left/right movement before pressing up
         # Keys for controlling player movement
         if key == arcade.key.UP:
             self.player_character.change_y = PLAYER_MOVEMENT_SPEED
-            propulsion = PropSprite(
-                asset="./assets/thruster_bottom.png",
-                scaling=SCALING,
-                x=self.player_character.center_x,
-                y=self.player_character.bottom - PLAYER_PROP_DISTANCE
-            )
-            propulsion.change_y = PLAYER_MOVEMENT_SPEED
-            self.player_character.prop_sprite_list.append(propulsion)
         elif key == arcade.key.DOWN:
             self.player_character.change_y = -PLAYER_MOVEMENT_SPEED
         elif key == arcade.key.LEFT:
             self.player_character.change_x = -PLAYER_MOVEMENT_SPEED
-            self.player_character.adjust_props(
-                change_x=self.player_character.change_x,
-                change_y=self.player_character.change_y
-            )
         elif key == arcade.key.RIGHT:
             self.player_character.change_x = PLAYER_MOVEMENT_SPEED
-            self.player_character.adjust_props(
-                change_x=self.player_character.change_x,
-                change_y=self.player_character.change_y
-            )
         # Keys for controlling player firing
         elif key == arcade.key.W:
-            self.create_bullet(
-                origin_character=self.player_character,
-                change_x=0,
-                change_y=1,
-                bullet_speed=PLAYER_BULLET_SPEED,
-                asset="./assets/pixel_laser_green_vertical.png"
-            )
-        elif key == arcade.key.A:
-            self.create_bullet(
-                origin_character=self.player_character,
-                change_x=-1,
-                change_y=0,
-                bullet_speed=PLAYER_BULLET_SPEED,
-                asset="./assets/pixel_laser_green_horizontal.png"
-            )
-        elif key == arcade.key.S:
-            self.create_bullet(
-                origin_character=self.player_character,
-                change_x=0,
-                change_y=-1,
-                bullet_speed=PLAYER_BULLET_SPEED,
-                asset="./assets/pixel_laser_green_vertical.png"
-            )
-        elif key == arcade.key.D:
-            self.create_bullet(
-                origin_character=self.player_character,
-                change_x=1,
-                change_y=0,
-                bullet_speed=PLAYER_BULLET_SPEED,
-                asset="./assets/pixel_laser_green_horizontal.png"
-            )
+            self.player_character.create_bullet(change_x=0, change_y=1)
+        # TODO: Enable cardinal shots after character overhauls
+        # elif key == arcade.key.A:
+        #     self.create_bullet(
+        #         origin_character=self.player_character,
+        #         asset="./assets/pixel_laser_green_horizontal.png",
+        #         change_x=-1,
+        #         change_y=0,
+        #         bullet_speed=PLAYER_BULLET_SPEED,
+        #     )
+        # elif key == arcade.key.S:
+        #     self.create_bullet(
+        #         origin_character=self.player_character,
+        #         change_x=0,
+        #         change_y=-1,
+        #         bullet_speed=PLAYER_BULLET_SPEED,
+        #         asset="./assets/pixel_laser_green_vertical.png"
+        #     )
+        # elif key == arcade.key.D:
+        #     self.create_bullet(
+        #         origin_character=self.player_character,
+        #         change_x=1,
+        #         change_y=0,
+        #         bullet_speed=PLAYER_BULLET_SPEED,
+        #         asset="./assets/pixel_laser_green_horizontal.png"
+        #     )
