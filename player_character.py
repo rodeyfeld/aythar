@@ -8,7 +8,7 @@ class PlayerCharacter(animated_entity_sprite.AnimatedEntitySprite):
 
     def __init__(self, texture_list, center_x, center_y, bullet_types, health=1, damage=1):
         super().__init__(texture_list=texture_list, center_x=center_x, center_y=center_y)
-        self.scale = SCALING
+        self.scale = SCALING * 4
         self.bullet_types = bullet_types
         self.bullet_list = arcade.SpriteList()
         self.health = health
@@ -23,10 +23,11 @@ class PlayerCharacter(animated_entity_sprite.AnimatedEntitySprite):
         bullet = bullet_sprite.BulletSprite(
             texture_list=bullet_type.texture_list,
             center_x=self.center_x,
-            center_y=self.center_y,
+            center_y=self.center_y + PLAYER_SPRITE_OFFSET,
             change_x=change_x,
             change_y=change_y
         )
+        bullet.scale = .5
         self.bullet_list.append(bullet)
 
     def update(self):
@@ -35,9 +36,3 @@ class PlayerCharacter(animated_entity_sprite.AnimatedEntitySprite):
             self.center_y += self.change_y
         if self.change_x != 0:
             self.center_x += self.change_x
-
-        # for bullet in self.bullet_list:
-
-    # def draw(self):
-        # super().draw()
-        # self.bullet_list.draw()
