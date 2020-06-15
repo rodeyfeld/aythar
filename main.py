@@ -5,6 +5,8 @@ from game import Game
 # https://hexadecimalwtf.itch.io/space-pixels
 # Explosions by Will Tice:
 # https://untiedgames.itch.io/five-free-pixel-explosions
+# Plasma ball by Geni and Thane Brimhall
+# http://commons.wikimedia.org/wiki/File:Plasmaball_vid2.ogg
 
 
 def main():

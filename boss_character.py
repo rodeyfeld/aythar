@@ -8,8 +8,9 @@ class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
 
     def __init__(self, texture_list, center_x, center_y, bullet_types, health=1, damage=1):
         super().__init__(texture_list=texture_list, center_x=center_x, center_y=center_y)
-        self.scale = SCALING * 4
+        self.scale = SCALING * .75
         self.bullet_types = bullet_types
+        self.bullet_list = arcade.SpriteList()
         self.health = health
         self.damage = damage
         print("Boss", self.textures)
@@ -24,3 +25,45 @@ class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
         #     self.center_x += BOSS_MOVEMENT_SPEED
         # elif self.center_x == WINDOW_WIDTH:
         #     self.center_x -= BOSS_MOVEMENT_SPEED
+        for bullet in self.bullet_list:
+            if (bullet.center_x > WINDOW_WIDTH or bullet.center_x < 0 or
+                    bullet.center_y > WINDOW_LENGTH or bullet.center_y < 0):
+                bullet.remove_from_sprite_lists()
+
+    def setup(self):
+        boss_fire_rate = 3
+        self.attack()
+
+    def create_bullet(self, bullet_type, change_x, change_y):
+        # bullet_type = self.bullet_types[0]
+
+        bullet = bullet_sprite.BulletSprite(
+            texture_list=bullet_type.texture_list,
+            center_x=self.center_x,
+            center_y=self.center_y,
+            change_x=change_x,
+            change_y=change_y
+        )
+        self.bullet_list.append(bullet)
+
+    def split_attack(self, delta_time):
+        num_attacks = 10
+        for i in range(1, num_attacks):
+            from random import randint
+            bullet_type = self.bullet_types[randint(0, len(self.bullet_types) - 1)]
+            # bullet_trajectory = (WINDOW_WIDTH // 2) + (i * bullet_distance)
+            bullet_trajectory = i
+            self.create_bullet(bullet_type=bullet_type, change_x=bullet_trajectory, change_y=BOSS_BULLET_SPEED)
+            self.create_bullet(bullet_type=bullet_type, change_x=-bullet_trajectory, change_y=BOSS_BULLET_SPEED)
+
+    def forward_attack(self, delta_time):
+        bullet_type = self.bullet_types[0]
+        self.create_bullet(bullet_type=bullet_type, change_x=0, change_y=BOSS_BULLET_SPEED+1)
+
+    def attack(self):
+        # delta_time param required by arcade library
+        split_attack_rate = 3
+        forward_attack_rate = 1.5
+        arcade.schedule(self.split_attack, split_attack_rate)
+        arcade.schedule(self.forward_attack, forward_attack_rate)
+

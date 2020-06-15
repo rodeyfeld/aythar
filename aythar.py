@@ -23,6 +23,7 @@ class Aythar(arcade.View):
         self.background_list: arcade.SpriteList = arcade.SpriteList()
         # SpriteList for player character
         self.player_character_list: arcade.SpriteList = arcade.SpriteList()
+        self.player_bullet_list: arcade.SpriteList = arcade.SpriteList()
         # SpriteList for enemies
         self.enemy_character_list: arcade.SpriteList = arcade.SpriteList()
         self.enemy_boss_character_list: arcade.SpriteList = arcade.SpriteList()
@@ -38,10 +39,10 @@ class Aythar(arcade.View):
         self.enemy_boss_character_texture_list = None
         self.enemy_boss_character_texture_list = None
         self.enemy_boss_bullet_types = []
+        self.enemy_boss_bullet_list = arcade.SpriteList()
         self.time_elapsed: float = 0.0
 
     def setup(self):
-        # self.create_player()
         # Create vertically scrolling background image
         self.background_list.append(PropSprite(
             asset="./assets/space_background.png",
@@ -71,9 +72,9 @@ class Aythar(arcade.View):
             )
         # Texture list for boss
         self.enemy_boss_character_texture_list = self.create_texture_list(
-            asset="./assets/enemy_boss.png",
-            sprite_width=32,
-            sprite_height=32,
+            asset="./assets/big_boss.png",
+            sprite_width=512,
+            sprite_height=512,
             columns=2,
             count=2
         )
@@ -96,9 +97,10 @@ class Aythar(arcade.View):
         arcade.start_render()
         self.background_list.draw()
         self.player_character_list.draw()
+        self.player_bullet_list.draw()
         self.enemy_character_list.draw()
         self.enemy_boss_character_list.draw()
-        self.bullet_list.draw()
+        self.enemy_boss_bullet_list.draw()
         self.explosion_list.draw()
         score_str = "Score: {0}".format(self.score)
         # Display score
@@ -106,7 +108,6 @@ class Aythar(arcade.View):
 
     def on_update(self, delta_time: float):
         self.time_elapsed += delta_time
-
         # Loop background
         background_one = self.background_list[0]
         background_two = self.background_list[1]
@@ -115,18 +116,29 @@ class Aythar(arcade.View):
         if background_two.bottom == -BACKGROUND_HEIGHT:
             background_two.center_y = WINDOW_LENGTH + BACKGROUND_HEIGHT // 2
         self.background_list.update()
+        if math.floor(self.time_elapsed) == 0 and len(self.player_character_list) < 1:
+            self.create_player()
         if math.floor(self.time_elapsed) == 1 and len(self.enemy_boss_character_list) < 1:
             self.create_boss()
-            self.create_player()
             # arcade.unschedule(self.create_enemy)
 
-        # for boss in self.enemy_boss_character_list:
-        #     boss.update()
+        # Update basic enemies
         self.enemy_character_list.update()
+        # Update enemy bosses
         self.enemy_boss_character_list.update()
-        self.bullet_list.update()
+        self.enemy_boss_bullet_list.update()
+        # Update explosions
         self.explosion_list.update()
+        # Update player
         self.player_character_list.update()
+        self.player_bullet_list.update()
+        for enemy_boss in self.enemy_boss_character_list:
+            collisions = enemy_boss.collides_with_list(self.player_character.bullet_list)
+            if collisions:
+                for collision in collisions:
+                    self.create_explosion(collision.center_x, collision.center_y)
+                    collision.remove_from_sprite_lists()
+                    enemy_boss.health -= 1
 
         for enemy in self.enemy_character_list:
             collisions = enemy.collides_with_list(self.bullet_list)
@@ -140,10 +152,10 @@ class Aythar(arcade.View):
                   enemy.center_y > WINDOW_LENGTH or enemy.center_y < 0):
                 enemy.remove_from_sprite_lists()
 
-        for bullet in self.bullet_list:
-            if (bullet.center_x > WINDOW_WIDTH or bullet.center_x < 0 or
-                    bullet.center_y > WINDOW_LENGTH or bullet.center_y < 0):
-                bullet.remove_from_sprite_lists()
+        # for bullet in self.bullet_list:
+        #     if (bullet.center_x > WINDOW_WIDTH or bullet.center_x < 0 or
+        #             bullet.center_y > WINDOW_LENGTH or bullet.center_y < 0):
+        #         bullet.remove_from_sprite_lists()
 
             # TODO send player to game over screen when hit by enemy
             # if enemy.collides_with_list(self.player_character_list):
@@ -152,20 +164,19 @@ class Aythar(arcade.View):
         # Initialize player character at the bottom middle of the window
         # Texture
         player_texture_list = self.create_texture_list(
-            asset="./assets/player_ship.png",
-            sprite_width=72,
-            sprite_height=72,
-            columns=4,
-            count=4
+            asset="./assets/player_starship.png",
+            sprite_width=32,
+            sprite_height=16,
+            columns=2,
+            count=2
         )
-        player_bullet_types = []
-        player_bullet_types.append(BulletType(self.create_texture_list(
-            asset="./assets/star_bullet.png",
-            sprite_width=64,
-            sprite_height=64,
-            columns=64,
-            count=64
-        )))
+        player_bullet_types = [BulletType(self.create_texture_list(
+            asset="./assets/laser_bullet.png",
+            sprite_width=128,
+            sprite_height=128,
+            columns=1,
+            count=9
+        ))]
 
         self.player_character = PlayerCharacter(
             texture_list=player_texture_list,
@@ -173,7 +184,8 @@ class Aythar(arcade.View):
             center_y=25,
             bullet_types=player_bullet_types
         )
-        self.player_character.setup()
+        # self.player_character.setup()
+        self.player_bullet_list = self.player_character.bullet_list
         self.player_character_list.append(self.player_character)
 
     def create_enemy(self, delta_time: float):
@@ -188,14 +200,32 @@ class Aythar(arcade.View):
     def create_boss(self):
         enemy_center_x = WINDOW_WIDTH // 2
         enemy_center_y = WINDOW_LENGTH
-        enemy_character = BossCharacter(
+        boss_bullet_types = [
+            BulletType(self.create_texture_list(
+                asset="./assets/star_bullet.png",
+                sprite_width=64,
+                sprite_height=64,
+                columns=64,
+                count=64
+            )),
+            BulletType(self.create_texture_list(
+                asset="./assets/plasma_bullet.png",
+                sprite_width=64,
+                sprite_height=64,
+                columns=4,
+                count=4
+            )),
+        ]
+        boss_character = BossCharacter(
             texture_list=self.enemy_boss_character_texture_list,
             center_x=enemy_center_x,
             center_y=enemy_center_y,
-            bullet_types=self.enemy_boss_bullet_types,
+            bullet_types=boss_bullet_types,
         )
-        enemy_character.change_y = -BOSS_MOVEMENT_SPEED
-        self.enemy_boss_character_list.append(enemy_character)
+        boss_character.change_y = -BOSS_MOVEMENT_SPEED
+        boss_character.setup()
+        self.enemy_boss_bullet_list = boss_character.bullet_list
+        self.enemy_boss_character_list.append(boss_character)
 
     def create_explosion(self, center_x, center_y):
         # Choose random explosion from explosions list
@@ -235,7 +265,7 @@ class Aythar(arcade.View):
             self.player_character.change_x = PLAYER_MOVEMENT_SPEED
         # Keys for controlling player firing
         elif key == arcade.key.W:
-            self.player_character.create_bullet(change_x=0, change_y=1)
+            self.player_character_list[0].create_bullet(change_x=0, change_y=PLAYER_BULLET_SPEED)
         # TODO: Enable cardinal shots after character overhauls
         # elif key == arcade.key.A:
         #     self.create_bullet(
