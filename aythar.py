@@ -23,6 +23,7 @@ class Aythar(arcade.View):
         self.background_list: arcade.SpriteList = arcade.SpriteList()
         # SpriteList for player character
         self.player_character_list: arcade.SpriteList = arcade.SpriteList()
+        self.player_bullet_list: arcade.SpriteList = arcade.SpriteList()
         # SpriteList for enemies
         self.enemy_character_list: arcade.SpriteList = arcade.SpriteList()
         self.enemy_boss_character_list: arcade.SpriteList = arcade.SpriteList()
@@ -94,11 +95,12 @@ class Aythar(arcade.View):
 
     def on_draw(self):
         arcade.start_render()
-        self.background_list.draw()
+        # self.background_list.draw()
         self.player_character_list.draw()
+        self.player_bullet_list.draw()
         self.enemy_character_list.draw()
         self.enemy_boss_character_list.draw()
-        self.bullet_list.draw()
+        # self.bullet_list.draw()
         self.explosion_list.draw()
         score_str = "Score: {0}".format(self.score)
         # Display score
@@ -106,15 +108,14 @@ class Aythar(arcade.View):
 
     def on_update(self, delta_time: float):
         self.time_elapsed += delta_time
-
         # Loop background
         background_one = self.background_list[0]
         background_two = self.background_list[1]
-        if background_one.bottom == -BACKGROUND_HEIGHT:
-            background_one.center_y = WINDOW_LENGTH + BACKGROUND_HEIGHT // 2
-        if background_two.bottom == -BACKGROUND_HEIGHT:
-            background_two.center_y = WINDOW_LENGTH + BACKGROUND_HEIGHT // 2
-        self.background_list.update()
+        # if background_one.bottom == -BACKGROUND_HEIGHT:
+        #     background_one.center_y = WINDOW_LENGTH + BACKGROUND_HEIGHT // 2
+        # if background_two.bottom == -BACKGROUND_HEIGHT:
+        #     background_two.center_y = WINDOW_LENGTH + BACKGROUND_HEIGHT // 2
+        # self.background_list.update()
         if math.floor(self.time_elapsed) == 1 and len(self.enemy_boss_character_list) < 1:
             self.create_boss()
             self.create_player()
@@ -127,6 +128,7 @@ class Aythar(arcade.View):
         self.bullet_list.update()
         self.explosion_list.update()
         self.player_character_list.update()
+        self.player_bullet_list.update()
 
         for enemy in self.enemy_character_list:
             collisions = enemy.collides_with_list(self.bullet_list)
@@ -158,14 +160,13 @@ class Aythar(arcade.View):
             columns=4,
             count=4
         )
-        player_bullet_types = []
-        player_bullet_types.append(BulletType(self.create_texture_list(
+        player_bullet_types = [BulletType(self.create_texture_list(
             asset="./assets/star_bullet.png",
             sprite_width=64,
             sprite_height=64,
             columns=64,
             count=64
-        )))
+        ))]
 
         self.player_character = PlayerCharacter(
             texture_list=player_texture_list,
@@ -173,7 +174,8 @@ class Aythar(arcade.View):
             center_y=25,
             bullet_types=player_bullet_types
         )
-        self.player_character.setup()
+        # self.player_character.setup()
+        self.player_bullet_list = self.player_character.bullet_list
         self.player_character_list.append(self.player_character)
 
     def create_enemy(self, delta_time: float):
@@ -235,7 +237,7 @@ class Aythar(arcade.View):
             self.player_character.change_x = PLAYER_MOVEMENT_SPEED
         # Keys for controlling player firing
         elif key == arcade.key.W:
-            self.player_character.create_bullet(change_x=0, change_y=1)
+            self.player_character_list[0].create_bullet(change_x=0, change_y=PLAYER_BULLET_SPEED)
         # TODO: Enable cardinal shots after character overhauls
         # elif key == arcade.key.A:
         #     self.create_bullet(
