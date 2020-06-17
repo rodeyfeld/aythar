@@ -8,6 +8,7 @@ from boss_character import BossCharacter
 from bullet_sprite import BulletSprite
 from bullet_type import BulletType
 from entity_sprite import EntitySprite
+from level import Level
 from player_character import PlayerCharacter
 from prop_sprite import PropSprite
 from config import *
@@ -27,9 +28,6 @@ class Aythar(arcade.View):
         # SpriteList for enemies
         self.enemy_character_list: arcade.SpriteList = arcade.SpriteList()
         self.enemy_boss_character_list: arcade.SpriteList = arcade.SpriteList()
-        # SpriteList for bullets
-        # TODO: Move to individual enemy/player classes
-        self.bullet_list: arcade.SpriteList = arcade.SpriteList()
         # SpriteList for explosions
         # TODO: Move to individual enemy/player classes
         self.explosion_list: arcade.SpriteList = arcade.SpriteList()
@@ -40,7 +38,12 @@ class Aythar(arcade.View):
         self.enemy_boss_character_texture_list = None
         self.enemy_boss_bullet_types = []
         self.enemy_boss_bullet_list = arcade.SpriteList()
+        # Total time elapsed in view
         self.time_elapsed: float = 0.0
+        # Levels
+        self.levels = []
+        self.curr_level = None
+        self.curr_level_num = 0
 
     def setup(self):
         # Create vertically scrolling background image
@@ -87,7 +90,9 @@ class Aythar(arcade.View):
             count=64
         ))
 
-        # Setup bullet for player
+        # Setup levels
+        self.curr_level = Level(number=1, num_max_enemies=10, num_max_bosses=1)
+        self.levels.append(self.curr_level)
 
     def schedule_enemies(self):
         # Every ENEMY_SPAWN_TIMER seconds, call the create_enemy function
@@ -116,11 +121,30 @@ class Aythar(arcade.View):
         if background_two.bottom == -BACKGROUND_HEIGHT:
             background_two.center_y = WINDOW_LENGTH + BACKGROUND_HEIGHT // 2
         self.background_list.update()
+
+        # Level is not complete, continue with enemy logic
+        curr_level = self.levels[self.curr_level_num]
+        if curr_level.is_complete is False:
+            if curr_level.enemies_spawning is False and curr_level.num_spawned_enemies < curr_level.num_max_enemies:
+                arcade.schedule(self.create_enemy, 1)
+                curr_level.enemies_spawning = True
+            elif curr_level.enemies_spawning and curr_level.num_spawned_enemies >= curr_level.num_max_enemies:
+                arcade.unschedule(self.create_enemy)
+                curr_level.enemies_spawning = False
+            elif curr_level.boss_spawning is False and curr_level.num_spawned_enemies == curr_level.num_max_enemies:
+                self.create_boss()
+                curr_level.boss_spawning = True
+        # Level is complete, move to next level if available
+        elif self.curr_level_num <= len(self.levels):
+            self.curr_level_num += 1
+        # No more levels
+        else:
+            pass
+
         if math.floor(self.time_elapsed) == 0 and len(self.player_character_list) < 1:
             self.create_player()
-        if math.floor(self.time_elapsed) == 1 and len(self.enemy_boss_character_list) < 1:
-            self.create_boss()
-            # arcade.unschedule(self.create_enemy)
+
+        # arcade.unschedule(self.create_enemy)
 
         # Update basic enemies
         self.enemy_character_list.update()
@@ -140,22 +164,19 @@ class Aythar(arcade.View):
                     collision.remove_from_sprite_lists()
                     enemy_boss.health -= 1
 
-        for enemy in self.enemy_character_list:
-            collisions = enemy.collides_with_list(self.bullet_list)
-            if collisions:
-                self.create_explosion(enemy.center_x, enemy.center_y)
-                self.score += 1
-                for collision in collisions:
-                    collision.remove_from_sprite_lists()
-                    enemy.remove_from_sprite_lists()
-            elif (enemy.center_x > WINDOW_WIDTH or enemy.center_x < 0 or
-                  enemy.center_y > WINDOW_LENGTH or enemy.center_y < 0):
-                enemy.remove_from_sprite_lists()
 
-        # for bullet in self.bullet_list:
-        #     if (bullet.center_x > WINDOW_WIDTH or bullet.center_x < 0 or
-        #             bullet.center_y > WINDOW_LENGTH or bullet.center_y < 0):
-        #         bullet.remove_from_sprite_lists()
+        #
+        # for enemy in self.enemy_character_list:
+        #     collisions = enemy.collides_with_list(self.bullet_list)
+        #     if collisions:
+        #         self.create_explosion(enemy.center_x, enemy.center_y)
+        #         self.score += 1
+        #         for collision in collisions:
+        #             collision.remove_from_sprite_lists()
+        #             enemy.remove_from_sprite_lists()
+        #     elif (enemy.center_x > WINDOW_WIDTH or enemy.center_x < 0 or
+        #           enemy.center_y > WINDOW_LENGTH or enemy.center_y < 0):
+        #         enemy.remove_from_sprite_lists()
 
             # TODO send player to game over screen when hit by enemy
             # if enemy.collides_with_list(self.player_character_list):
@@ -196,6 +217,7 @@ class Aythar(arcade.View):
         enemy_character = EntitySprite("./assets/enemy_ship.png", SCALING, enemy_center_x, enemy_center_y)
         enemy_character.change_y = -ENEMY_MOVEMENT_SPEED
         self.enemy_character_list.append(enemy_character)
+        self.curr_level.num_spawned_enemies += 1
 
     def create_boss(self):
         enemy_center_x = WINDOW_WIDTH // 2
