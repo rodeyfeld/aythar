@@ -1,4 +1,5 @@
 import arcade
+from config import *
 
 
 class AnimatedEntitySprite(arcade.Sprite):
@@ -17,6 +18,10 @@ class AnimatedEntitySprite(arcade.Sprite):
 
     def update(self):
         # Update to the next frame of the animation. Reset if at end of animation
+        if self.center_x > WINDOW_WIDTH or self.center_x < 0 or \
+                self.center_y > WINDOW_LENGTH or self.center_y < 0:
+            self.remove_from_sprite_lists()
+
         if self.current_texture < len(self.textures):
             self.set_texture(self.current_texture)
             self.current_texture += 1

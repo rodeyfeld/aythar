@@ -164,19 +164,15 @@ class Aythar(arcade.View):
                     collision.remove_from_sprite_lists()
                     enemy_boss.health -= 1
 
+        for enemy in self.enemy_character_list:
+            collisions = enemy.collides_with_list(self.player_bullet_list)
+            if collisions:
+                self.create_explosion(enemy.center_x, enemy.center_y)
+                self.score += 1
+                for collision in collisions:
+                    collision.remove_from_sprite_lists()
+                enemy.remove_from_sprite_lists()
 
-        #
-        # for enemy in self.enemy_character_list:
-        #     collisions = enemy.collides_with_list(self.bullet_list)
-        #     if collisions:
-        #         self.create_explosion(enemy.center_x, enemy.center_y)
-        #         self.score += 1
-        #         for collision in collisions:
-        #             collision.remove_from_sprite_lists()
-        #             enemy.remove_from_sprite_lists()
-        #     elif (enemy.center_x > WINDOW_WIDTH or enemy.center_x < 0 or
-        #           enemy.center_y > WINDOW_LENGTH or enemy.center_y < 0):
-        #         enemy.remove_from_sprite_lists()
 
             # TODO send player to game over screen when hit by enemy
             # if enemy.collides_with_list(self.player_character_list):
