@@ -81,15 +81,6 @@ class Aythar(arcade.View):
             columns=2,
             count=2
         )
-        # Texture list for boss bullets
-        self.enemy_boss_bullet_types.append(self.create_texture_list(
-            asset="./assets/bullets/star_bullet.png",
-            sprite_width=64,
-            sprite_height=64,
-            columns=64,
-            count=64
-        ))
-
         # Setup levels
         self.curr_level = Level(number=1, num_max_enemies=10, num_max_bosses=1)
         self.levels.append(self.curr_level)
@@ -219,18 +210,25 @@ class Aythar(arcade.View):
         enemy_center_y = WINDOW_LENGTH
         boss_bullet_types = [
             BulletType(self.create_texture_list(
-                asset="./assets/bullets/star_bullet.png",
-                sprite_width=64,
-                sprite_height=64,
-                columns=64,
-                count=64
+                asset="./assets/bullets/magenta_bullet_1.png",
+                sprite_width=192,
+                sprite_height=192,
+                columns=5,
+                count=30
             )),
             BulletType(self.create_texture_list(
-                asset="./assets/bullets/plasma_bullet.png",
-                sprite_width=64,
-                sprite_height=64,
-                columns=4,
-                count=4
+                asset="./assets/bullets/teal_bullet_1.png",
+                sprite_width=192,
+                sprite_height=192,
+                columns=5,
+                count=30
+            )),
+            BulletType(self.create_texture_list(
+                asset="./assets/bullets/yellow_bullet_1.png",
+                sprite_width=192,
+                sprite_height=192,
+                columns=5,
+                count=30
             )),
         ]
         boss_character = BossCharacter(
