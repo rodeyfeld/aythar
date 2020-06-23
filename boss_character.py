@@ -10,6 +10,8 @@ class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
         super().__init__(texture_list=texture_list, center_x=center_x, center_y=center_y)
         self.scale = SCALING * .75
         self.bullet_types = bullet_types
+        self.primary_bullet_types = None
+        self.secondary_bullet_types = None
         self.bullet_list = arcade.SpriteList()
         self.health = health
         self.damage = damage
@@ -31,12 +33,11 @@ class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
                 bullet.remove_from_sprite_lists()
 
     def setup(self):
-        boss_fire_rate = 3
+        self.primary_bullet_types = [self.bullet_types[0]]
+        self.secondary_bullet_types = self.bullet_types[1:]
         self.attack()
 
     def create_bullet(self, bullet_type, change_x, change_y):
-        # bullet_type = self.bullet_types[0]
-
         bullet = bullet_sprite.BulletSprite(
             texture_list=bullet_type.texture_list,
             center_x=self.center_x,
@@ -50,14 +51,14 @@ class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
         num_attacks = 10
         for i in range(1, num_attacks):
             from random import randint
-            bullet_type = self.bullet_types[randint(0, len(self.bullet_types) - 1)]
+            bullet_type = self.secondary_bullet_types[randint(0, len(self.secondary_bullet_types) - 1)]
             # bullet_trajectory = (WINDOW_WIDTH // 2) + (i * bullet_distance)
             bullet_trajectory = i
             self.create_bullet(bullet_type=bullet_type, change_x=bullet_trajectory, change_y=BOSS_BULLET_SPEED)
             self.create_bullet(bullet_type=bullet_type, change_x=-bullet_trajectory, change_y=BOSS_BULLET_SPEED)
 
     def forward_attack(self, delta_time):
-        bullet_type = self.bullet_types[0]
+        bullet_type = self.primary_bullet_types[0]
         self.create_bullet(bullet_type=bullet_type, change_x=0, change_y=BOSS_BULLET_SPEED+1)
 
     def attack(self):
