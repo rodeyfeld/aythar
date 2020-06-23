@@ -48,22 +48,22 @@ class Aythar(arcade.View):
     def setup(self):
         # Create vertically scrolling background image
         self.background_list.append(PropSprite(
-            asset="./assets/space_background.png",
-            scaling=SCALING * 10,
+            asset="./assets/backgrounds/space_background.png",
+            scaling=SCALING,
             x=WINDOW_WIDTH // 2,
             y=BACKGROUND_HEIGHT // 2,
             change_y=-BACKGROUND_SCROLL_SPEED
         ))
         self.background_list.append(PropSprite(
-            asset="./assets/space_background.png",
-            scaling=SCALING * 10,
+            asset="./assets/backgrounds/space_background.png",
+            scaling=SCALING,
             x=WINDOW_WIDTH // 2,
             y=BACKGROUND_HEIGHT + WINDOW_LENGTH // 2,
             change_y=-BACKGROUND_SCROLL_SPEED
         ))
         # Currently 3 explosion types available
         for i in range(0, 3):
-            asset = "./assets/explosion_" + str(i) + ".png"
+            asset = "./assets/explosions/explosion_" + str(i) + ".png"
             self.explosion_texture_list.append(
                 self.create_texture_list(
                     asset=asset,
@@ -75,7 +75,7 @@ class Aythar(arcade.View):
             )
         # Texture list for boss
         self.enemy_boss_character_texture_list = self.create_texture_list(
-            asset="./assets/big_boss.png",
+            asset="./assets/enemies/big_boss.png",
             sprite_width=512,
             sprite_height=512,
             columns=2,
@@ -83,7 +83,7 @@ class Aythar(arcade.View):
         )
         # Texture list for boss bullets
         self.enemy_boss_bullet_types.append(self.create_texture_list(
-            asset="./assets/star_bullet.png",
+            asset="./assets/bullets/star_bullet.png",
             sprite_width=64,
             sprite_height=64,
             columns=64,
@@ -116,9 +116,9 @@ class Aythar(arcade.View):
         # Loop background
         background_one = self.background_list[0]
         background_two = self.background_list[1]
-        if background_one.bottom == -BACKGROUND_HEIGHT:
+        if background_one.bottom <= -BACKGROUND_HEIGHT:
             background_one.center_y = WINDOW_LENGTH + BACKGROUND_HEIGHT // 2
-        if background_two.bottom == -BACKGROUND_HEIGHT:
+        if background_two.bottom <= -BACKGROUND_HEIGHT:
             background_two.center_y = WINDOW_LENGTH + BACKGROUND_HEIGHT // 2
         self.background_list.update()
 
@@ -173,7 +173,6 @@ class Aythar(arcade.View):
                     collision.remove_from_sprite_lists()
                 enemy.remove_from_sprite_lists()
 
-
             # TODO send player to game over screen when hit by enemy
             # if enemy.collides_with_list(self.player_character_list):
 
@@ -181,14 +180,14 @@ class Aythar(arcade.View):
         # Initialize player character at the bottom middle of the window
         # Texture
         player_texture_list = self.create_texture_list(
-            asset="./assets/player_starship.png",
+            asset="./assets/players/player_starship.png",
             sprite_width=32,
             sprite_height=16,
             columns=2,
             count=2
         )
         player_bullet_types = [BulletType(self.create_texture_list(
-            asset="./assets/laser_bullet.png",
+            asset="./assets/bullets/laser_bullet.png",
             sprite_width=128,
             sprite_height=128,
             columns=1,
@@ -210,7 +209,7 @@ class Aythar(arcade.View):
         # Add an enemy starting at the top of the window and at a random position on the x axis
         enemy_center_x = randint(0 + ENEMY_SPAWN_OFFSET, WINDOW_WIDTH - ENEMY_SPAWN_OFFSET)
         enemy_center_y = WINDOW_LENGTH
-        enemy_character = EntitySprite("./assets/enemy_ship.png", SCALING, enemy_center_x, enemy_center_y)
+        enemy_character = EntitySprite("./assets/enemies/enemy_ship.png", SCALING, enemy_center_x, enemy_center_y)
         enemy_character.change_y = -ENEMY_MOVEMENT_SPEED
         self.enemy_character_list.append(enemy_character)
         self.curr_level.num_spawned_enemies += 1
@@ -220,14 +219,14 @@ class Aythar(arcade.View):
         enemy_center_y = WINDOW_LENGTH
         boss_bullet_types = [
             BulletType(self.create_texture_list(
-                asset="./assets/star_bullet.png",
+                asset="./assets/bullets/star_bullet.png",
                 sprite_width=64,
                 sprite_height=64,
                 columns=64,
                 count=64
             )),
             BulletType(self.create_texture_list(
-                asset="./assets/plasma_bullet.png",
+                asset="./assets/bullets/plasma_bullet.png",
                 sprite_width=64,
                 sprite_height=64,
                 columns=4,
@@ -271,7 +270,6 @@ class Aythar(arcade.View):
             self.player_character.change_x = 0
 
     def on_key_press(self, key, modifiers):
-        # TODO: Fix propulsion sprite leaving player character on left/right movement before pressing up
         # Keys for controlling player movement
         if key == arcade.key.UP:
             self.player_character.change_y = PLAYER_MOVEMENT_SPEED
