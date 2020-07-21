@@ -82,7 +82,7 @@ class Aythar(arcade.View):
             count=2
         )
         # Setup levels
-        self.curr_level = Level(number=1, num_max_enemies=10, num_max_bosses=1)
+        self.curr_level = Level(number=1, num_max_enemies=2, num_max_bosses=1)
         self.levels.append(self.curr_level)
 
     def schedule_enemies(self):
@@ -135,8 +135,6 @@ class Aythar(arcade.View):
         if math.floor(self.time_elapsed) == 0 and len(self.player_character_list) < 1:
             self.create_player()
 
-        # arcade.unschedule(self.create_enemy)
-
         # Update basic enemies
         self.enemy_character_list.update()
         # Update enemy bosses
@@ -148,12 +146,17 @@ class Aythar(arcade.View):
         self.player_character_list.update()
         self.player_bullet_list.update()
         for enemy_boss in self.enemy_boss_character_list:
-            collisions = enemy_boss.collides_with_list(self.player_character.bullet_list)
-            if collisions:
-                for collision in collisions:
-                    self.create_explosion(collision.center_x, collision.center_y)
-                    collision.remove_from_sprite_lists()
-                    enemy_boss.health -= 1
+            if enemy_boss.health > 0:
+                collisions = enemy_boss.collides_with_list(self.player_character.bullet_list)
+                if collisions:
+                    for collision in collisions:
+                        self.create_explosion(collision.center_x, collision.center_y)
+                        collision.remove_from_sprite_lists()
+                        enemy_boss.health -= 1
+                        if enemy_boss.health == 0:
+                            self.create_explosion(enemy_boss.center_x, enemy_boss.center_y, 10)
+                            enemy_boss.ceasefire()
+                            enemy_boss.remove_from_sprite_lists()
 
         for enemy in self.enemy_character_list:
             collisions = enemy.collides_with_list(self.player_bullet_list)
@@ -242,10 +245,11 @@ class Aythar(arcade.View):
         self.enemy_boss_bullet_list = boss_character.bullet_list
         self.enemy_boss_character_list.append(boss_character)
 
-    def create_explosion(self, center_x, center_y):
+    def create_explosion(self, center_x, center_y, scale_modifier=1):
         # Choose random explosion from explosions list
         explosion_type = self.explosion_texture_list[randint(0, len(self.explosion_texture_list) - 1)]
         explosion = AnimatedPropSprite(explosion_type, center_x, center_y)
+        explosion.scale *= scale_modifier
         explosion.update()
         self.explosion_list.append(explosion)
 

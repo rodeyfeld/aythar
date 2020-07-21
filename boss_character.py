@@ -68,3 +68,6 @@ class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
         arcade.schedule(self.split_attack, split_attack_rate)
         arcade.schedule(self.forward_attack, forward_attack_rate)
 
+    def ceasefire(self):
+        arcade.unschedule(self.split_attack)
+        arcade.unschedule(self.forward_attack)
