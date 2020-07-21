@@ -6,7 +6,7 @@ from config import *
 
 class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
 
-    def __init__(self, texture_list, center_x, center_y, bullet_types, health=1, damage=1):
+    def __init__(self, texture_list, center_x, center_y, bullet_types, health=10):
         super().__init__(texture_list=texture_list, center_x=center_x, center_y=center_y)
         self.scale = SCALING * .75
         self.bullet_types = bullet_types
@@ -14,7 +14,6 @@ class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
         self.secondary_bullet_types = None
         self.bullet_list = arcade.SpriteList()
         self.health = health
-        self.damage = damage
         print("Boss", self.textures)
 
     def update(self):
@@ -22,11 +21,6 @@ class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
         self.center_y += self.change_y
         if self.center_y < WINDOW_LENGTH - WINDOW_LENGTH // 4:
             self.change_y = 0
-        #     self.change_x = BOSS_MOVEMENT_SPEED
-        # if self.center_x == 0:
-        #     self.center_x += BOSS_MOVEMENT_SPEED
-        # elif self.center_x == WINDOW_WIDTH:
-        #     self.center_x -= BOSS_MOVEMENT_SPEED
         for bullet in self.bullet_list:
             if (bullet.center_x > WINDOW_WIDTH or bullet.center_x < 0 or
                     bullet.center_y > WINDOW_LENGTH or bullet.center_y < 0):
@@ -39,12 +33,13 @@ class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
 
     def create_bullet(self, bullet_type, change_x, change_y):
         bullet = bullet_sprite.BulletSprite(
-            texture_list=bullet_type.texture_list,
+            bullet_type=bullet_type,
             center_x=self.center_x,
-            center_y=self.center_y,
+            center_y=self.bottom,
             change_x=change_x,
             change_y=change_y
         )
+        bullet.scale = .25
         self.bullet_list.append(bullet)
 
     def split_attack(self, delta_time):

@@ -6,7 +6,7 @@ from config import *
 
 class PlayerCharacter(animated_entity_sprite.AnimatedEntitySprite):
 
-    def __init__(self, texture_list, center_x, center_y, bullet_types, health=1, damage=1):
+    def __init__(self, texture_list, center_x, center_y, bullet_types, health=3, damage=1):
         super().__init__(texture_list=texture_list, center_x=center_x, center_y=center_y)
         self.scale = SCALING * 4
         self.bullet_types = bullet_types
@@ -21,7 +21,7 @@ class PlayerCharacter(animated_entity_sprite.AnimatedEntitySprite):
     def create_bullet(self, change_x, change_y):
         bullet_type = self.bullet_types[0]
         bullet = bullet_sprite.BulletSprite(
-            texture_list=bullet_type.texture_list,
+            bullet_type=bullet_type,
             center_x=self.center_x,
             center_y=self.center_y + PLAYER_SPRITE_OFFSET,
             change_x=change_x,

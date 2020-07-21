@@ -29,7 +29,6 @@ class Aythar(arcade.View):
         self.enemy_character_list: arcade.SpriteList = arcade.SpriteList()
         self.enemy_boss_character_list: arcade.SpriteList = arcade.SpriteList()
         # SpriteList for explosions
-        # TODO: Move to individual enemy/player classes
         self.explosion_list: arcade.SpriteList = arcade.SpriteList()
         # Textures for the explosions assigned in setup
         self.explosion_texture_list = []
@@ -99,8 +98,13 @@ class Aythar(arcade.View):
         self.enemy_boss_bullet_list.draw()
         self.explosion_list.draw()
         score_str = "Score: {0}".format(self.score)
+        if self.player_character:
+            health_str = "Health: {0}".format(self.player_character.health)
+        else:
+            health_str = "Health: {0}".format(PLAYER_DEFAULT_HEALTH)
         # Display score
         arcade.draw_text(score_str, SCORE_POS_X, SCORE_POS_Y, arcade.color.WHITE, SCORE_FONT_SIZE)
+        arcade.draw_text(health_str, HEALTH_POS_X, HEALTH_POS_Y, arcade.color.WHITE, SCORE_FONT_SIZE)
 
     def on_update(self, delta_time: float):
         self.time_elapsed += delta_time
@@ -145,6 +149,8 @@ class Aythar(arcade.View):
         # Update player
         self.player_character_list.update()
         self.player_bullet_list.update()
+        # Type in SpriteList is a BossCharacter Sprite Class
+        enemy_boss: BossCharacter
         for enemy_boss in self.enemy_boss_character_list:
             if enemy_boss.health > 0:
                 collisions = enemy_boss.collides_with_list(self.player_character.bullet_list)
@@ -152,7 +158,7 @@ class Aythar(arcade.View):
                     for collision in collisions:
                         self.create_explosion(collision.center_x, collision.center_y)
                         collision.remove_from_sprite_lists()
-                        enemy_boss.health -= 1
+                        enemy_boss.health -= self.player_character.damage
                         if enemy_boss.health == 0:
                             self.create_explosion(enemy_boss.center_x, enemy_boss.center_y, 10)
                             enemy_boss.ceasefire()
@@ -167,8 +173,19 @@ class Aythar(arcade.View):
                     collision.remove_from_sprite_lists()
                 enemy.remove_from_sprite_lists()
 
-            # TODO send player to game over screen when hit by enemy
-            # if enemy.collides_with_list(self.player_character_list):
+        # If player is hit by enemy boss, reduce health
+        # Type in SpriteList is a PlayerCharacter Sprite Class
+        player_character: PlayerCharacter
+        for player_character in self.player_character_list:
+            # Type in SpriteList is a BulletSprite Sprite Class
+            enemy_boss_bullet: BulletSprite
+            for enemy_boss_bullet in self.enemy_boss_bullet_list:
+                if player_character.collides_with_sprite(enemy_boss_bullet):
+                    self.create_explosion(player_character.center_x, player_character.center_y)
+                    self.player_character.health -= enemy_boss_bullet.bullet_type.damage
+                    enemy_boss_bullet.remove_from_sprite_lists()
+                    if player_character.health == 0:
+                        self.create_explosion(player_character.center_x, player_character.center_y, 5)
 
     def create_player(self):
         # Initialize player character at the bottom middle of the window
@@ -234,7 +251,7 @@ class Aythar(arcade.View):
                 count=30
             )),
         ]
-        boss_character = BossCharacter(
+        boss_character: BossCharacter = BossCharacter(
             texture_list=self.enemy_boss_character_texture_list,
             center_x=enemy_center_x,
             center_y=enemy_center_y,
