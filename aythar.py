@@ -191,11 +191,11 @@ class Aythar(arcade.View):
         # Initialize player character at the bottom middle of the window
         # Texture
         player_texture_list = self.create_texture_list(
-            asset="./assets/players/player_starship.png",
-            sprite_width=32,
-            sprite_height=16,
-            columns=2,
-            count=2
+            asset="./assets/players/rodey_player_character_spaceship.png",
+            sprite_width=150,
+            sprite_height=100,
+            columns=10,
+            count=10
         )
         player_bullet_types = [BulletType(self.create_texture_list(
             asset="./assets/bullets/laser_bullet.png",
