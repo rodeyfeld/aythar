@@ -8,7 +8,7 @@ class PlayerCharacter(animated_entity_sprite.AnimatedEntitySprite):
 
     def __init__(self, texture_list, center_x, center_y, bullet_types, health=3, damage=1):
         super().__init__(texture_list=texture_list, center_x=center_x, center_y=center_y)
-        self.scale = SCALING * 4
+        self.scale = SCALING
         self.bullet_types = bullet_types
         self.bullet_list = arcade.SpriteList()
         self.health = health

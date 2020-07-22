@@ -8,7 +8,7 @@ class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
 
     def __init__(self, texture_list, center_x, center_y, bullet_types, health=10):
         super().__init__(texture_list=texture_list, center_x=center_x, center_y=center_y)
-        self.scale = SCALING * .75
+        self.scale = SCALING
         self.bullet_types = bullet_types
         self.primary_bullet_types = None
         self.secondary_bullet_types = None
@@ -39,7 +39,7 @@ class BossCharacter(animated_entity_sprite.AnimatedEntitySprite):
             change_x=change_x,
             change_y=change_y
         )
-        bullet.scale = .25
+        # bullet.scale = .25
         self.bullet_list.append(bullet)
 
     def split_attack(self, delta_time):
