@@ -241,7 +241,7 @@ class Aythar(arcade.View):
         self.curr_level.num_spawned_enemies += 1
 
     def create_boss(self):
-        enemy_center_x = WINDOW_WIDTH // 2//
+        enemy_center_x = WINDOW_WIDTH // 2
         enemy_center_y = WINDOW_LENGTH
         boss_bullet_types = [
             BulletType(self.create_texture_list(
