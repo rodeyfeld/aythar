@@ -81,7 +81,7 @@ class Aythar(arcade.View):
             count=2
         )
         # Setup levels
-        self.curr_level = Level(number=1, num_max_enemies=50, num_max_bosses=1)
+        self.curr_level = Level(number=1, num_max_enemies=2, num_max_bosses=1)
         self.levels.append(self.curr_level)
 
     def schedule_enemies(self):
@@ -241,29 +241,29 @@ class Aythar(arcade.View):
         self.curr_level.num_spawned_enemies += 1
 
     def create_boss(self):
-        enemy_center_x = WINDOW_WIDTH // 2
+        enemy_center_x = WINDOW_WIDTH // 2//
         enemy_center_y = WINDOW_LENGTH
         boss_bullet_types = [
             BulletType(self.create_texture_list(
-                asset="./assets/bullets/magenta_bullet_1.png",
-                sprite_width=192,
-                sprite_height=192,
-                columns=5,
-                count=30
+                asset="./assets/bullets/green_laser_extended_frames.png",
+                sprite_width=25,
+                sprite_height=25,
+                columns=6,
+                count=36
             )),
             BulletType(self.create_texture_list(
-                asset="./assets/bullets/teal_bullet_1.png",
-                sprite_width=192,
-                sprite_height=192,
-                columns=5,
-                count=30
+                asset="./assets/bullets/green_laser_extended_frames.png",
+                sprite_width=25,
+                sprite_height=25,
+                columns=6,
+                count=36
             )),
             BulletType(self.create_texture_list(
-                asset="./assets/bullets/yellow_bullet_1.png",
-                sprite_width=192,
-                sprite_height=192,
-                columns=5,
-                count=30
+                asset="./assets/bullets/green_laser_extended_frames.png",
+                sprite_width=25,
+                sprite_height=25,
+                columns=6,
+                count=36
             )),
         ]
         boss_character: BossCharacter = BossCharacter(
