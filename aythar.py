@@ -81,7 +81,7 @@ class Aythar(arcade.View):
             count=2
         )
         # Setup levels
-        self.curr_level = Level(number=1, num_max_enemies=2, num_max_bosses=1)
+        self.curr_level = Level(number=1, num_max_enemies=50, num_max_bosses=1)
         self.levels.append(self.curr_level)
 
     def schedule_enemies(self):
@@ -206,18 +206,18 @@ class Aythar(arcade.View):
         # Initialize player character at the bottom middle of the window
         # Texture
         player_texture_list = self.create_texture_list(
-            asset="./assets/players/rodey_player_character_spaceship.png",
+            asset="./assets/players/rodey_player_starship.png",
             sprite_width=150,
-            sprite_height=100,
-            columns=10,
-            count=10
+            sprite_height=150,
+            columns=5,
+            count=5
         )
         player_bullet_types = [BulletType(self.create_texture_list(
-            asset="./assets/bullets/laser_bullet.png",
-            sprite_width=128,
-            sprite_height=128,
+            asset="./assets/bullets/laser1.png",
+            sprite_width=25,
+            sprite_height=25,
             columns=1,
-            count=9
+            count=5
         ))]
 
         self.player_character = PlayerCharacter(
