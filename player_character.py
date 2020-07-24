@@ -27,7 +27,6 @@ class PlayerCharacter(animated_entity_sprite.AnimatedEntitySprite):
             change_x=change_x,
             change_y=change_y
         )
-        bullet.scale = .5
         self.bullet_list.append(bullet)
 
     def update(self):
