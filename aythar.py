@@ -108,6 +108,21 @@ class Aythar(arcade.View):
 
     def on_update(self, delta_time: float):
         self.time_elapsed += delta_time
+
+        if self.player_character:
+            if self.player_character.center_x >= WINDOW_WIDTH:
+                self.player_character.change_x = 0
+                self.player_character.center_x -= PLAYER_MOVEMENT_SPEED
+            if self.player_character.center_x <= 0:
+                self.player_character.change_x = 0
+                self.player_character.center_x += PLAYER_MOVEMENT_SPEED
+            if self.player_character.center_y >= WINDOW_LENGTH:
+                self.player_character.change_y = 0
+                self.player_character.center_y -= PLAYER_MOVEMENT_SPEED
+            if self.player_character.center_y <= 0:
+                self.player_character.change_y = 0
+                self.player_character.center_y += PLAYER_MOVEMENT_SPEED
+
         # Loop background
         background_one = self.background_list[0]
         background_two = self.background_list[1]
